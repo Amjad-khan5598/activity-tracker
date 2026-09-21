@@ -9,6 +9,8 @@ import com.example.activitytracker.model.User;
 import com.example.activitytracker.DTO.LoginRequest;
 import com.example.activitytracker.DTO.SignupRequest;
 import com.example.activitytracker.DTO.UserDTO;
+import com.example.activitytracker.exception.EmailAlreadyExistsException;
+import com.example.activitytracker.exception.InvalidCredentialsException;
 
 @Service
 public class AuthService {
@@ -22,7 +24,12 @@ public class AuthService {
     }
 
     public User signup(SignupRequest request) {
-        User user = new User();
+    	Optional<User> userOptional = userRepository.findByEmail(request.getEmail());
+    	if (userOptional.isPresent()) {
+    	    throw new EmailAlreadyExistsException("User already exists");
+    	}
+    	
+    	User user = new User();
         user.setName(request.getName());
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
@@ -34,11 +41,11 @@ public class AuthService {
     public UserDTO login(LoginRequest request) {
     	Optional<User> userOptional = userRepository.findByEmail(request.getEmail());
     	if (userOptional.isEmpty()) {
-    	    throw new RuntimeException("Invalid email or password");
+    	    throw new InvalidCredentialsException("Invalid email or password");
     	    }
     	User user = userOptional.get();
     	if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-    	    throw new RuntimeException("Invalid email or password");
+    	    throw new InvalidCredentialsException("Invalid email or password");
     	}
     	return new UserDTO(user.getId(), user.getName(), user.getEmail(), user.getRole());
     }
