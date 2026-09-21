@@ -15,38 +15,38 @@ import com.example.activitytracker.exception.InvalidCredentialsException;
 @Service
 public class AuthService {
 
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
+	private final UserRepository userRepository;
+	private final PasswordEncoder passwordEncoder;
 
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
+	public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+		this.userRepository = userRepository;
+		this.passwordEncoder = passwordEncoder;
+	}
 
-    public User signup(SignupRequest request) {
-    	Optional<User> userOptional = userRepository.findByEmail(request.getEmail());
-    	if (userOptional.isPresent()) {
-    	    throw new EmailAlreadyExistsException("User already exists");
-    	}
-    	
-    	User user = new User();
-        user.setName(request.getName());
-        user.setEmail(request.getEmail());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setRole("USER");
-        
-        return userRepository.save(user);
-    }
-    
-    public UserDTO login(LoginRequest request) {
-    	Optional<User> userOptional = userRepository.findByEmail(request.getEmail());
-    	if (userOptional.isEmpty()) {
-    	    throw new InvalidCredentialsException("Invalid email or password");
-    	    }
-    	User user = userOptional.get();
-    	if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-    	    throw new InvalidCredentialsException("Invalid email or password");
-    	}
-    	return new UserDTO(user.getId(), user.getName(), user.getEmail(), user.getRole());
-    }
+	public User signup(SignupRequest request) {
+		Optional<User> userOptional = userRepository.findByEmail(request.getEmail());
+		if (userOptional.isPresent()) {
+			throw new EmailAlreadyExistsException("User already exists");
+		}
+
+		User user = new User();
+		user.setName(request.getName());
+		user.setEmail(request.getEmail());
+		user.setPassword(passwordEncoder.encode(request.getPassword()));
+		user.setRole("USER");
+
+		return userRepository.save(user);
+	}
+
+	public UserDTO login(LoginRequest request) {
+		Optional<User> userOptional = userRepository.findByEmail(request.getEmail());
+		if (userOptional.isEmpty()) {
+			throw new InvalidCredentialsException("Invalid email or password");
+		}
+		User user = userOptional.get();
+		if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+			throw new InvalidCredentialsException("Invalid email or password");
+		}
+		return new UserDTO(user.getId(), user.getName(), user.getEmail(), user.getRole());
+	}
 }

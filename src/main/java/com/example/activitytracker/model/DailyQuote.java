@@ -11,10 +11,10 @@ import lombok.Data;
 @Entity
 @Data
 public class DailyQuote {
-  @Id
-  @GeneratedValue(strategy= GenerationType.IDENTITY)
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-  private String quote;
-  private LocalDate date;
-  
+	private String quote;
+	private LocalDate date;
+
 }

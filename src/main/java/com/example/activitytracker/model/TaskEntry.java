@@ -12,13 +12,13 @@ import lombok.Data;
 @Entity
 @Data
 public class TaskEntry {
-@Id
-@GeneratedValue(strategy= GenerationType.IDENTITY)
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-private LocalDate date;
-private String taskDescription;
-private boolean completed;
-@ManyToOne
-@JoinColumn(name = "user_id")
-private User user;
+	private LocalDate date;
+	private String taskDescription;
+	private boolean completed;
+	@ManyToOne
+	@JoinColumn(name = "user_id")
+	private User user;
 }
