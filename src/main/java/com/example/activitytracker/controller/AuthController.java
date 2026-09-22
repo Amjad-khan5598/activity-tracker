@@ -9,17 +9,21 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.activitytracker.DTO.LoginRequest;
 import com.example.activitytracker.DTO.SignupRequest;
+import com.example.activitytracker.DTO.TokenResponseDTO;
 import com.example.activitytracker.DTO.UserDTO;
 import com.example.activitytracker.model.User;
 import com.example.activitytracker.service.AuthService;
+import com.example.activitytracker.util.JwtUtil;
 
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
 	private final AuthService authService;
-
-	public AuthController(AuthService authService) {
+	private final JwtUtil jwtUtil;
+	
+	public AuthController(AuthService authService, JwtUtil jwtUtil) {
 		this.authService = authService;
+		this.jwtUtil = jwtUtil;
 	}
 
 	@PostMapping("/signup")
@@ -30,9 +34,21 @@ public class AuthController {
 	}
 
 	@PostMapping("/login")
-	public ResponseEntity<UserDTO> login(@RequestBody LoginRequest request) {
-		UserDTO dto = authService.login(request);
-		return ResponseEntity.status(HttpStatus.OK).body(dto);
+	public ResponseEntity<TokenResponseDTO> login(@RequestBody LoginRequest request) {
+	    User user = authService.login(request);
+
+	    String token = jwtUtil.generateToken(user);
+
+	    UserDTO dto = new UserDTO(
+	        user.getId(),
+	        user.getName(),
+	        user.getEmail(),
+	        user.getRole()
+	    );
+
+	    TokenResponseDTO response = new TokenResponseDTO(dto, token);
+
+	    return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 
 }

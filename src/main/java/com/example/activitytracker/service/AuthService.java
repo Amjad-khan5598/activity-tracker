@@ -38,7 +38,7 @@ public class AuthService {
 		return userRepository.save(user);
 	}
 
-	public UserDTO login(LoginRequest request) {
+	public User login(LoginRequest request) {
 		Optional<User> userOptional = userRepository.findByEmail(request.getEmail());
 		if (userOptional.isEmpty()) {
 			throw new InvalidCredentialsException("Invalid email or password");
@@ -47,6 +47,6 @@ public class AuthService {
 		if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
 			throw new InvalidCredentialsException("Invalid email or password");
 		}
-		return new UserDTO(user.getId(), user.getName(), user.getEmail(), user.getRole());
+		return user;
 	}
 }
