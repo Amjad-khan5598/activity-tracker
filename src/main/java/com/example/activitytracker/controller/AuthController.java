@@ -48,7 +48,7 @@ public class AuthController {
 
 	    TokenResponseDTO response = new TokenResponseDTO(dto, token);
 
-	    return ResponseEntity.status(HttpStatus.OK).body(response);
+	    return ResponseEntity.ok(response);
 	}
 
 }
