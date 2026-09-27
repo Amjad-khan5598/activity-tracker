@@ -8,6 +8,8 @@ import org.springframework.security.core.Authentication;
 
 import com.example.activitytracker.DTO.TaskRequestDTO;
 import com.example.activitytracker.DTO.TaskResponseDTO;
+import com.example.activitytracker.exception.TaskAccessDeniedException;
+import com.example.activitytracker.exception.TaskNotFoundException;
 import com.example.activitytracker.model.TaskEntry;
 import com.example.activitytracker.model.User;
 import com.example.activitytracker.repository.TaskEntryRepository;
@@ -77,10 +79,10 @@ public class TaskEntryServiceImpl implements TaskEntryService{
 	    User user = getAuthenticatedUser();
 
 	    TaskEntry task = taskEntryRepository.findById(taskId)
-	            .orElseThrow(() -> new RuntimeException("Task not found"));
+	            .orElseThrow(() -> new TaskNotFoundException("Task not found"));
 
 	    if (!task.getUser().getId().equals(user.getId())) {
-	        throw new RuntimeException("You are not allowed to access this task");
+	        throw new TaskAccessDeniedException("You are not allowed to access this task");
 	    }
 
 	    return new TaskResponseDTO(
@@ -96,10 +98,10 @@ public class TaskEntryServiceImpl implements TaskEntryService{
 	    User user = getAuthenticatedUser();
 
 	    TaskEntry task = taskEntryRepository.findById(taskId)
-	            .orElseThrow(() -> new RuntimeException("Task not found"));
+	            .orElseThrow(() -> new TaskNotFoundException("Task not found"));
 
 	    if (!task.getUser().getId().equals(user.getId())) {
-	        throw new RuntimeException("You are not allowed to update this task");
+	        throw new TaskAccessDeniedException("You are not allowed to update this task");
 	    }
 
 	    task.setDate(request.getDate());
@@ -121,10 +123,10 @@ public class TaskEntryServiceImpl implements TaskEntryService{
 	    User user = getAuthenticatedUser();
 
 	    TaskEntry task = taskEntryRepository.findById(taskId)
-	            .orElseThrow(() -> new RuntimeException("Task not found"));
+	            .orElseThrow(() -> new TaskNotFoundException("Task not found"));
 
 	    if (!task.getUser().getId().equals(user.getId())) {
-	        throw new RuntimeException("You are not allowed to delete this task");
+	        throw new TaskAccessDeniedException("You are not allowed to delete this task");
 	    }
 
 	    taskEntryRepository.delete(task);

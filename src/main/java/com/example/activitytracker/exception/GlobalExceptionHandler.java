@@ -23,4 +23,16 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<String> handleGenericException(RuntimeException ex) {
 		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
 	}
+	
+	@ExceptionHandler(TaskNotFoundException.class)
+		public ResponseEntity<String>handleTaskNotFoundException(TaskNotFoundException ex){
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+		
+	}
+	
+	@ExceptionHandler(TaskAccessDeniedException.class)
+	public ResponseEntity<String>handleTaskAccessDeniedException(TaskAccessDeniedException ex){
+		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
+	
+}
 }
