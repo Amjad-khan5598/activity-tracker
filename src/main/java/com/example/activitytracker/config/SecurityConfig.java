@@ -1,6 +1,7 @@
 package com.example.activitytracker.config;
 
 import org.springframework.context.annotation.Bean;
+import com.example.activitytracker.security.JwtAuthenticationEntryPoint;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,8 +17,11 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 public class SecurityConfig {
 	
 	 private final JwtAuthenticationFilter jwtAuthenticationFilter;
-	public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter){
+	 private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+	 
+	public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter, JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint){
 		this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+		this.jwtAuthenticationEntryPoint= jwtAuthenticationEntryPoint;
 	}
 	
 	@Bean
@@ -37,6 +41,9 @@ public class SecurityConfig {
 	        auth.requestMatchers("/api/auth/**").permitAll()
 	            .anyRequest().authenticated()
 	    )
+	    .exceptionHandling(exception ->
+	    exception.authenticationEntryPoint(jwtAuthenticationEntryPoint)
+	)
 	    .addFilterBefore(
 	        jwtAuthenticationFilter,
 	        UsernamePasswordAuthenticationFilter.class
