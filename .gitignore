@@ -32,6 +32,9 @@ build/
 ### VS Code ###
 .vscode/
 
+**/.postman/
+**/postman/
+
 bin/
 output.txt
-set 
+
