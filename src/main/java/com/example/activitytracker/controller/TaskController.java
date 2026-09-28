@@ -17,6 +17,8 @@ import com.example.activitytracker.DTO.TaskRequestDTO;
 import com.example.activitytracker.DTO.TaskResponseDTO;
 import com.example.activitytracker.service.TaskEntryService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api/tasks")
 public class TaskController {
@@ -29,7 +31,7 @@ public class TaskController {
 
     @PostMapping
     public ResponseEntity<TaskResponseDTO> createTask(
-            @RequestBody TaskRequestDTO request) {
+    		@Valid @RequestBody TaskRequestDTO request) {
 
         TaskResponseDTO response = taskEntryService.createTask(request);
 
@@ -56,7 +58,7 @@ public class TaskController {
     @PutMapping("/{taskId}")
     public ResponseEntity<TaskResponseDTO> updateTask(
             @PathVariable Long taskId,
-            @RequestBody TaskRequestDTO request) {
+            @Valid  @RequestBody TaskRequestDTO request) {
 
         TaskResponseDTO response =
                 taskEntryService.update(taskId, request);
