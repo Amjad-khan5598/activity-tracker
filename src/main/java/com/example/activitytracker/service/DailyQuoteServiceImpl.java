@@ -1,0 +1,23 @@
+package com.example.activitytracker.service;
+
+import java.time.LocalDate;
+
+import org.springframework.stereotype.Service;
+
+import com.example.activitytracker.model.DailyQuote;
+import com.example.activitytracker.repository.DailyQuoteRepository;
+
+@Service
+public class DailyQuoteServiceImpl implements DailyQuoteService{
+	 
+	private final DailyQuoteRepository dailyQuoteRepository;
+	public DailyQuoteServiceImpl( DailyQuoteRepository dailyQuoteRepository) {
+		this.dailyQuoteRepository = dailyQuoteRepository;
+	}
+	@Override
+	public DailyQuote getDailyQuote() {
+		LocalDate today = LocalDate.now();
+		return null;
+	}
+		
+}

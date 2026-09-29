@@ -14,7 +14,11 @@ public class DailyQuote {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+	
 	private String quote;
+	
+	private String author;
+	
 	private LocalDate date;
 
 }
