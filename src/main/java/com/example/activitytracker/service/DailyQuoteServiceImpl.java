@@ -1,6 +1,7 @@
 package com.example.activitytracker.service;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
@@ -17,6 +18,9 @@ public class DailyQuoteServiceImpl implements DailyQuoteService{
 	@Override
 	public DailyQuote getDailyQuote() {
 		LocalDate today = LocalDate.now();
+		
+		Optional<DailyQuote> existingQuote =
+	            dailyQuoteRepository.findByDate(today);
 		return null;
 	}
 		

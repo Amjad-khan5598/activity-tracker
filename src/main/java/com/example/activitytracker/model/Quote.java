@@ -1,26 +1,21 @@
 package com.example.activitytracker.model;
 
-import java.time.LocalDate;
-
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import lombok.Data;
 
 @Entity
 @Data
-public class DailyQuote {
+public class Quote {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
-	private LocalDate date;
+	@Column(nullable = false, unique = true)
+	private String quote;
 	
-	@ManyToOne
-	@JoinColumn(name = "quote_id")
-	private Quote quote;
-
+	private String author;
 }
