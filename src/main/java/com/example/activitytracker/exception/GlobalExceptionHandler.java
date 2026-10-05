@@ -34,6 +34,15 @@ public class GlobalExceptionHandler {
 		
 	}
 	
+	@ExceptionHandler(UserNotFoundException.class)
+	public ResponseEntity<String> handleUserNotFoundException(
+	        UserNotFoundException ex) {
+
+	    return ResponseEntity
+	            .status(HttpStatus.NOT_FOUND)
+	            .body(ex.getMessage());
+	}
+	
 	@ExceptionHandler(TaskAccessDeniedException.class)
 	public ResponseEntity<String>handleTaskAccessDeniedException(TaskAccessDeniedException ex){
 		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
