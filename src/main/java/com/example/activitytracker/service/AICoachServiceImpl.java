@@ -11,14 +11,15 @@ public class AICoachServiceImpl implements AICoachService{
 
 	@Override
 	public AICoachResponseDTO getCoaching() {
-		 Authentication authentication =
-	                SecurityContextHolder.getContext().getAuthentication();
 
-	        String email = authentication.getName();
+	    Authentication authentication =
+	            SecurityContextHolder.getContext().getAuthentication();
 
-	        System.out.println("AI Coach requested by: " + email);
+	    String email = authentication.getName();
 
-	        return new AICoachResponseDTO();
+	    System.out.println("AI Coach requested by: " + email);
+
+	    return new AICoachResponseDTO();
 	}
 	
 
