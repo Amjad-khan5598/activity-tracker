@@ -1,6 +1,7 @@
 package com.example.activitytracker.controller;
 
 import org.springframework.http.HttpStatus;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,7 +28,7 @@ public class AuthController {
 	}
 
 	@PostMapping("/signup")
-	public ResponseEntity<UserDTO> signup(@RequestBody SignupRequest request) {
+	public ResponseEntity<UserDTO> signup(@Valid@RequestBody SignupRequest request) {
 		User user = authService.signup(request);
 		UserDTO dto = new UserDTO(user.getId(), user.getName(), user.getEmail(), user.getRole());
 		return ResponseEntity.status(HttpStatus.CREATED).body(dto);

@@ -1,6 +1,7 @@
 package com.example.activitytracker.service;
 
 import com.example.activitytracker.DTO.AICoachResponseDTO;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.example.activitytracker.DTO.ProgressResponseDTO;
 import com.example.activitytracker.exception.UserNotFoundException;
 import com.example.activitytracker.model.TaskEntry;
@@ -21,13 +22,18 @@ public class AICoachServiceImpl implements AICoachService{
 	 private final ProgressService progressService;
 	 private final TaskEntryRepository taskEntryRepository;
 	 private final UserRepository userRepository;
+	 private final ObjectMapper objectMapper;
 
-	    public AICoachServiceImpl(Client geminiClient,ProgressService progressService,TaskEntryRepository taskEntryRepository,UserRepository userRepository) {
-	        this.geminiClient = geminiClient;
+	    public AICoachServiceImpl(Client geminiClient,ProgressService progressService,
+	    		TaskEntryRepository taskEntryRepository,
+	    		UserRepository userRepository,ObjectMapper objectMapper) {
+	        
+	    	this.geminiClient = geminiClient;
 	        this.progressService=progressService;
 	        this.taskEntryRepository=taskEntryRepository;
 	        this.userRepository=userRepository;
-	    }
+	        this.objectMapper=objectMapper;	    
+	        }
 
 	    @Override
 	    public AICoachResponseDTO getCoaching() {
@@ -74,10 +80,21 @@ public class AICoachServiceImpl implements AICoachService{
 	                null
 	        ).text();
 
-	        System.out.println("Gemini response: " + response);
+	        AICoachResponseDTO coachResponse;
 
-	        return new AICoachResponseDTO();
+	        try {
+	            coachResponse = objectMapper.readValue(
+	                    response,
+	                    AICoachResponseDTO.class
+	            );
+	        } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+	            throw new RuntimeException("Failed to parse Gemini response", e);
+	        }
+
+
+	        return coachResponse;
 	    }
+	    
 	    private String buildPrompt(ProgressResponseDTO progress, List<TaskEntry> tasks) {
 
 	        StringBuilder prompt = new StringBuilder();
@@ -129,14 +146,22 @@ public class AICoachServiceImpl implements AICoachService{
 
 	        prompt.append("""
 	                
-	                Based only on the information provided above:
-	                1. Give a short summary of the user's current productivity.
-	                2. Give one useful observation.
-	                3. Give one practical suggestion.
-	                4. Give one short motivational message.
+	              Based only on the information provided above, return a valid JSON object
+        with exactly these four string fields:
 
-	                Do not invent information that is not present in the data.
-	                """);
+        {
+          "summary": "A short summary of the user's productivity",
+          "feedback": "One useful observation about their progress",
+          "suggestion": "One practical action they can take",
+          "motivation": "One short motivational message"
+        }
+
+        Rules:
+        - Return only the JSON object.
+        - Do not include Markdown code fences.
+        - All four fields must be strings.
+        - Do not invent information that is not present in the data.
+        """);
 
 	        return prompt.toString();
 	    }

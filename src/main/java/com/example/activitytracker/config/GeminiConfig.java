@@ -1,6 +1,7 @@
 package com.example.activitytracker.config;
 
 import org.springframework.context.annotation.Bean;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.context.annotation.Configuration;
 
 import com.google.genai.Client;
@@ -16,5 +17,9 @@ public class GeminiConfig {
         return Client.builder()
                 .apiKey(apiKey)
                 .build();
+    }
+    @Bean
+    public ObjectMapper objectMapper() {
+        return new ObjectMapper();
     }
 }
