@@ -138,4 +138,17 @@ public ResponseEntity<ErrorResponseDTO> handleMethodArgumentNotValidException(
                 .status(HttpStatus.SERVICE_UNAVAILABLE)
                 .body(error);
     }
+    
+    @ExceptionHandler(AIConfigurationException.class)
+    public ResponseEntity<ErrorResponseDTO>handleAIConfigurationException(AIConfigurationException ex){
+    	 ErrorResponseDTO error = new ErrorResponseDTO(
+    	            500,
+    	            "AI_CONFIGURATION_ERROR",
+    	            "The AI service is incorrectly configured. Please try again later."
+    	    );
+
+    	    return ResponseEntity
+    	            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+    	            .body(error);
+    } 
 }

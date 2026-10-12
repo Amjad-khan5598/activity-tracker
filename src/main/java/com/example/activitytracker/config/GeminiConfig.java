@@ -13,6 +13,12 @@ public class GeminiConfig {
     public Client geminiClient() {
 
         String apiKey = System.getenv("GEMINI_API_KEY");
+        
+        if (apiKey == null || apiKey.isBlank()) {
+            throw new IllegalStateException(
+                    "GEMINI_API_KEY environment variable is not configured"
+            );
+        }
 
         return Client.builder()
                 .apiKey(apiKey)
