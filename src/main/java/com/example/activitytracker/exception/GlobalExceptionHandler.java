@@ -1,6 +1,8 @@
 package com.example.activitytracker.exception;
 
 import java.util.HashMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import com.example.activitytracker.DTO.ErrorResponseDTO;
@@ -13,7 +15,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
-
+	
+	private static final Logger logger =
+	        LoggerFactory.getLogger(GlobalExceptionHandler.class);
+	
     @ExceptionHandler(InvalidCredentialsException.class)
     public ResponseEntity<ErrorResponseDTO> handleInvalidCredentialsException(
             InvalidCredentialsException ex) {
@@ -77,15 +82,18 @@ public ResponseEntity<ErrorResponseDTO> handleMethodArgumentNotValidException(
 }
 
 
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<ErrorResponseDTO> handleGenericException(
-            RuntimeException ex) {
+	@ExceptionHandler(RuntimeException.class)
+	public ResponseEntity<ErrorResponseDTO> handleGenericException(
+        RuntimeException ex) {
 
-        // Log the exception internally in a later step.
-        return buildError(HttpStatus.INTERNAL_SERVER_ERROR,
-                "INTERNAL_SERVER_ERROR",
-                "An unexpected error occurred.");
-    }
+    logger.error("Unexpected runtime exception occurred", ex);
+
+    return buildError(
+            HttpStatus.INTERNAL_SERVER_ERROR,
+            "INTERNAL_SERVER_ERROR",
+            "An unexpected error occurred."
+    );
+}
 
     private ResponseEntity<ErrorResponseDTO> buildError(
             HttpStatus status, String error, String message) {
