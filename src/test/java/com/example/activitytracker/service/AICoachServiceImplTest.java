@@ -1,9 +1,11 @@
-
 package com.example.activitytracker.service;
 
 import com.example.activitytracker.DTO.AICoachResponseDTO;
 import com.example.activitytracker.DTO.ProgressResponseDTO;
+import com.example.activitytracker.exception.AIConfigurationException;
+import com.example.activitytracker.exception.AIRateException;
 import com.example.activitytracker.exception.AIResponseException;
+import com.example.activitytracker.exception.AIServiceUnavailableException;
 import com.example.activitytracker.model.User;
 import com.example.activitytracker.repository.TaskEntryRepository;
 import com.example.activitytracker.repository.UserRepository;
@@ -11,6 +13,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -48,22 +51,14 @@ class AICoachServiceImplTest {
     @InjectMocks
     private AICoachServiceImpl aiCoachService;
 
-    @AfterEach
-    void clearSecurityContext() {
-        SecurityContextHolder.clearContext();
-    }
-
-    @Test
-    void shouldThrowAIResponseExceptionWhenResponseIsInvalid() throws Exception {
-
-        // Simulate an authenticated user
+    @BeforeEach
+    void setUp() {
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken(
                         "test@example.com", null
                 )
         );
 
-        // Prepare the user
         User user = new User();
         user.setEmail("test@example.com");
 
@@ -75,21 +70,78 @@ class AICoachServiceImplTest {
 
         when(progressService.getProgress())
                 .thenReturn(new ProgressResponseDTO());
+    }
 
-        // Simulate Gemini returning text
+    @AfterEach
+    void clearSecurityContext() {
+        SecurityContextHolder.clearContext();
+    }
+
+    @Test
+    void shouldThrowAIResponseExceptionWhenResponseIsInvalid()
+            throws Exception {
+
         when(geminiClientService.generateContent(anyString()))
                 .thenReturn("invalid JSON");
 
-        // Simulate Jackson failing to parse that text
         when(objectMapper.readValue(
                 anyString(),
                 eq(AICoachResponseDTO.class)
         )).thenThrow(new JsonProcessingException("Invalid JSON") {});
 
-        // Verify the service converts the parsing error
-        // into AIResponseException
         assertThrows(
                 AIResponseException.class,
+                () -> aiCoachService.getCoaching()
+        );
+    }
+
+    @Test
+    void shouldThrowAIRateExceptionWhenGeminiRateLimitIsExceeded() {
+
+        com.google.genai.errors.ApiException apiException =
+                mock(com.google.genai.errors.ApiException.class);
+
+        when(apiException.code()).thenReturn(429);
+
+        when(geminiClientService.generateContent(anyString()))
+                .thenThrow(apiException);
+
+        assertThrows(
+                AIRateException.class,
+                () -> aiCoachService.getCoaching()
+        );
+    }
+
+    @Test
+    void shouldThrowAIServiceUnavailableExceptionWhenGeminiIsUnavailable() {
+
+        com.google.genai.errors.ApiException apiException =
+                mock(com.google.genai.errors.ApiException.class);
+
+        when(apiException.code()).thenReturn(503);
+
+        when(geminiClientService.generateContent(anyString()))
+                .thenThrow(apiException);
+
+        assertThrows(
+                AIServiceUnavailableException.class,
+                () -> aiCoachService.getCoaching()
+        );
+    }
+
+    @Test
+    void shouldThrowAIConfigurationExceptionWhenGeminiAuthenticationFails() {
+
+        com.google.genai.errors.ApiException apiException =
+                mock(com.google.genai.errors.ApiException.class);
+
+        when(apiException.code()).thenReturn(401);
+
+        when(geminiClientService.generateContent(anyString()))
+                .thenThrow(apiException);
+
+        assertThrows(
+                AIConfigurationException.class,
                 () -> aiCoachService.getCoaching()
         );
     }
