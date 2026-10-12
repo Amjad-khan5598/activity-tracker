@@ -3,12 +3,16 @@ package com.example.activitytracker.service;
 import com.example.activitytracker.DTO.AICoachResponseDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.example.activitytracker.DTO.ProgressResponseDTO;
+import com.example.activitytracker.exception.AIRateException;
+import com.example.activitytracker.exception.AIResponseException;
+import com.example.activitytracker.exception.AIServiceUnavailableException;
 import com.example.activitytracker.exception.UserNotFoundException;
 import com.example.activitytracker.model.TaskEntry;
 import com.example.activitytracker.model.User;
 import com.example.activitytracker.repository.TaskEntryRepository;
 import com.example.activitytracker.repository.UserRepository;
 import com.google.genai.Client;
+import com.google.genai.errors.ApiException;
 
 import java.util.List;
 
@@ -48,37 +52,34 @@ public class AICoachServiceImpl implements AICoachService{
 
 	        List<TaskEntry> tasks = taskEntryRepository.findByUser(user);
 
-	        System.out.println("Number of tasks retrieved: " + tasks.size());
-
-	        for (TaskEntry task : tasks) {
-	            System.out.println(
-	                    "Task: " + task.getTaskDescription()
-	                    + " | Date: " + task.getDate()
-	                    + " | Completed: " + task.isCompleted()
-	            );
-	        }
-
-	        System.out.println("AI Coach requested by: " + email);
-
 	        ProgressResponseDTO progress = progressService.getProgress();
 	        String prompt = buildPrompt(progress, tasks);
 
-	        System.out.println("----- AI PROMPT -----");
-	        System.out.println(prompt);
-	        System.out.println("--------------------");
-
-	        System.out.println("Total tasks: " + progress.getTotalTasks());
-	        System.out.println("Completed tasks: " + progress.getCompletedTasks());
-	        System.out.println("Completion rate: " + progress.getCompletionRate());
-	        System.out.println("Current streak: " + progress.getCurrentStreak());
-	        System.out.println("Tasks today: " + progress.getTasksToday());
-	        System.out.println("Completed today: " + progress.getCompletedToday());
-
-	        String response = geminiClient.models.generateContent(
+	        String response;
+	        try {
+	        response = geminiClient.models.generateContent(
 	                "gemini-3.5-flash-lite",
 	                prompt,
 	                null
 	        ).text();
+	        }
+	        
+	        catch(ApiException e){
+	        	 if (e.code() == 429) {
+	        	        throw new AIRateException(
+	        	                "Gemini API rate limit exceeded",
+	        	                e
+	        	        );
+	        	    }
+	        	 if (e.code() >= 500 && e.code() <= 599) {
+	        	        throw new AIServiceUnavailableException(
+	        	                "Gemini service is temporarily unavailable",
+	        	                e
+	        	        );
+	        	    }
+
+	        	    throw e;
+	        }
 
 	        AICoachResponseDTO coachResponse;
 
@@ -88,7 +89,7 @@ public class AICoachServiceImpl implements AICoachService{
 	                    AICoachResponseDTO.class
 	            );
 	        } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
-	            throw new RuntimeException("Failed to parse Gemini response", e);
+	            throw new AIResponseException("Gemini returned an invalid response", e);
 	        }
 
 

@@ -1,14 +1,15 @@
 package com.example.activitytracker.exception;
 
 import java.util.HashMap;
-import java.util.Map;
 
+import java.util.Map;
 import com.example.activitytracker.DTO.ErrorResponseDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -93,5 +94,48 @@ public ResponseEntity<ErrorResponseDTO> handleMethodArgumentNotValidException(
                 status.value(), error, message);
 
         return ResponseEntity.status(status).body(response);
+    }
+    @ExceptionHandler(AIResponseException.class)
+    	public ResponseEntity<ErrorResponseDTO> handleAIResponseException(
+    	        AIResponseException ex) {
+
+    	    ErrorResponseDTO error = new ErrorResponseDTO(
+    	            502,
+    	            "AI_RESPONSE_ERROR",
+    	            "The AI service returned an invalid response."
+    	    );
+
+    	    return ResponseEntity
+    	            .status(HttpStatus.BAD_GATEWAY)
+    	            .body(error);
+    }
+    @ExceptionHandler(AIRateException.class)
+    public ResponseEntity<ErrorResponseDTO> handleAIRateException(
+            AIRateException ex) {
+
+        ErrorResponseDTO error = new ErrorResponseDTO(
+                429,
+                "AI_RATE_LIMIT_EXCEEDED",
+                "The AI service rate limit has been reached. Please try again later."
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.TOO_MANY_REQUESTS)
+                .body(error);
+    }
+    
+    @ExceptionHandler(AIServiceUnavailableException.class)
+    public ResponseEntity<ErrorResponseDTO> handleAIServiceUnavailableException(
+            AIServiceUnavailableException ex) {
+
+        ErrorResponseDTO error = new ErrorResponseDTO(
+                503,
+                "AI_SERVICE_UNAVAILABLE",
+                "The AI service is temporarily unavailable. Please try again later."
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(error);
     }
 }
