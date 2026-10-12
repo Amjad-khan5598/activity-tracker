@@ -145,4 +145,25 @@ class AICoachServiceImplTest {
                 () -> aiCoachService.getCoaching()
         );
     }
+    
+    @Test
+    void shouldThrowAIConfigurationExceptionWhenGeminiReturnsInvalidApiKey() {
+        com.google.genai.errors.ApiException apiException =
+                mock(com.google.genai.errors.ApiException.class);
+
+        when(apiException.code()).thenReturn(400);
+        when(apiException.getMessage()).thenReturn(
+                "400 INVALID_ARGUMENT. API key not valid. " +
+                "Details: {\"reason\":\"API_KEY_INVALID\"}"
+        );
+
+        when(geminiClientService.generateContent(anyString()))
+                .thenThrow(apiException);
+
+        assertThrows(
+                AIConfigurationException.class,
+                () -> aiCoachService.getCoaching()
+        );
+    }
+    
 }

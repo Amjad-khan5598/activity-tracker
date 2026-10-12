@@ -65,7 +65,10 @@ public class AICoachServiceImpl implements AICoachService {
         try {
             response = geminiClientService.generateContent(prompt);
 
+            
         } catch (ApiException e) {
+
+            
 
             int statusCode = e.code();
 
@@ -74,7 +77,11 @@ public class AICoachServiceImpl implements AICoachService {
                         "Gemini API rate limit exceeded", e);
             }
 
-            if (statusCode == 401 || statusCode == 403) {
+            if (statusCode == 401 || statusCode == 403
+                    || (statusCode == 400
+                    && e.getMessage() != null
+                    && e.getMessage().contains("API_KEY_INVALID"))) {
+
                 throw new AIConfigurationException(
                         "Gemini API authentication or configuration failed", e);
             }
@@ -86,6 +93,7 @@ public class AICoachServiceImpl implements AICoachService {
 
             throw e;
         }
+        
 
         try {
             return objectMapper.readValue(
