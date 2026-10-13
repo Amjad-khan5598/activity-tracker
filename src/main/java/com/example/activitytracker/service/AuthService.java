@@ -1,7 +1,7 @@
 package com.example.activitytracker.service;
 
 import java.util.Optional;
-
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.example.activitytracker.repository.UserRepository;
@@ -34,8 +34,12 @@ public class AuthService {
 		user.setEmail(request.getEmail());
 		user.setPassword(passwordEncoder.encode(request.getPassword()));
 		user.setRole("USER");
-
+		
+		try {
 		return userRepository.save(user);
+		}catch (DataIntegrityViolationException ex) {
+		    throw new EmailAlreadyExistsException("User already exists");
+		}
 	}
 
 	public User login(LoginRequest request) {
