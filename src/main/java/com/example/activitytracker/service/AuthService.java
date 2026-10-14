@@ -1,6 +1,8 @@
 package com.example.activitytracker.service;
 
 import java.util.Optional;
+import java.sql.SQLException;
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -36,10 +38,34 @@ public class AuthService {
 		user.setRole("USER");
 		
 		try {
-		return userRepository.save(user);
-		}catch (DataIntegrityViolationException ex) {
-		    throw new EmailAlreadyExistsException("User already exists");
+		    return userRepository.saveAndFlush(user);
+		} catch (DataIntegrityViolationException ex) {
+		    if (isEmailDuplicate(ex)) {
+		        throw new EmailAlreadyExistsException("User already exists");
+		    }
+		    throw ex;
 		}
+	}
+	
+	private boolean isEmailDuplicate(DataIntegrityViolationException ex) {
+	    Throwable cause = ex;
+
+	    while (cause != null) {
+	        if (cause instanceof ConstraintViolationException cve) {
+	            SQLException sqlException = cve.getSQLException();
+
+	            if (sqlException != null
+	                    && sqlException.getErrorCode() == 1062
+	                    && cve.getConstraintName() != null
+	                    && cve.getConstraintName().contains("uk_user_email")) {
+	                return true;
+	            }
+	        }
+
+	        cause = cause.getCause();
+	    }
+
+	    return false;
 	}
 
 	public User login(LoginRequest request) {
