@@ -1,6 +1,8 @@
 package com.example.activitytracker.controller;
 
 import java.util.List;
+import org.springframework.web.bind.annotation.RequestParam;
+import com.example.activitytracker.DTO.TaskPageResponseDTO;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,11 +41,14 @@ public class TaskController {
     }
 
     @GetMapping
-    public ResponseEntity<List<TaskResponseDTO>> getMyTasks() {
+    public ResponseEntity<TaskPageResponseDTO> getMyTasks(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
 
-        List<TaskResponseDTO> tasks = taskEntryService.getMyTasks();
+        TaskPageResponseDTO response =
+                taskEntryService.getMyTasks(page, size);
 
-        return ResponseEntity.ok(tasks);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{taskId}")

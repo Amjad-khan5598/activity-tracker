@@ -1,6 +1,12 @@
 package com.example.activitytracker.service;
 
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+
+import com.example.activitytracker.DTO.TaskPageResponseDTO;
 
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -59,11 +65,30 @@ public class TaskEntryServiceImpl implements TaskEntryService{
 	}
 	
 	@Override
-	public List<TaskResponseDTO> getMyTasks() {
+	public TaskPageResponseDTO getMyTasks(int page, int size) {
 
 	    User user = getAuthenticatedUser();
 
-	    return taskEntryRepository.findByUser(user)
+	    // Protect the API from invalid or excessively large page requests.
+	    if (page < 0) {
+	        throw new IllegalArgumentException("Page must not be negative");
+	    }
+
+	    if (size < 1 || size > 100) {
+	        throw new IllegalArgumentException(
+	                "Page size must be between 1 and 100");
+	    }
+
+	    Pageable pageable = PageRequest.of(
+	            page,
+	            size,
+	            Sort.by("id").ascending()
+	    );
+
+	    Page<TaskEntry> taskPage =
+	            taskEntryRepository.findByUser(user, pageable);
+
+	    List<TaskResponseDTO> tasks = taskPage.getContent()
 	            .stream()
 	            .map(task -> new TaskResponseDTO(
 	                    task.getId(),
@@ -72,6 +97,15 @@ public class TaskEntryServiceImpl implements TaskEntryService{
 	                    task.isCompleted()
 	            ))
 	            .toList();
+
+	    return new TaskPageResponseDTO(
+	            tasks,
+	            taskPage.getNumber(),
+	            taskPage.getSize(),
+	            taskPage.getTotalElements(),
+	            taskPage.getTotalPages(),
+	            taskPage.isLast()
+	    );
 	}
 	@Override
 	public TaskResponseDTO getTaskById(Long taskId) {

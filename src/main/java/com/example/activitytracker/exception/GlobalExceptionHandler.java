@@ -159,4 +159,14 @@ public ResponseEntity<ErrorResponseDTO> handleMethodArgumentNotValidException(
     	            .status(HttpStatus.INTERNAL_SERVER_ERROR)
     	            .body(error);
     } 
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponseDTO> handleIllegalArgument(
+            IllegalArgumentException ex) {
+
+    	return buildError(
+                HttpStatus.BAD_REQUEST,
+                "INVALID_REQUEST",
+                ex.getMessage()
+        );
+    }
 }
