@@ -21,7 +21,7 @@ public class TaskEntry {
 	@Column(nullable = false)
 	private LocalDate date;
 	
-	@Column(nullable = false)
+	@Column(nullable = false, length = 500)
 	private String taskDescription;
 	
 	private boolean completed;
